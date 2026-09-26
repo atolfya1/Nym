@@ -1,0 +1,63 @@
+import org.gradle.api.Project
+import java.io.File
+import java.util.Properties
+
+fun Project.getBuildTaskName(): String {
+	val taskRequestsStr = gradle.startParameter.taskRequests[0].toString()
+	return taskRequestsStr.also {
+		project.logger.lifecycle("Build task: $it")
+	}
+}
+
+fun Project.getSigningProperties(): Properties {
+	return Properties().apply {
+		// created local file for signing details
+		try {
+			load(file("signing.properties").reader())
+		} catch (_: Exception) {
+			load(file("signing_template.properties").reader())
+		}
+	}
+}
+
+fun Project.getStoreFile(): File {
+	return file(
+		System.getenv()
+			.getOrDefault(
+				Constants.KEY_STORE_PATH_VAR,
+				getSigningProperties().getProperty(Constants.KEY_STORE_PATH_VAR),
+			),
+	)
+}
+
+fun Project.getSigningProperty(property: String): String {
+	// try to get secrets from env first for pipeline build, then properties file for local
+	return System.getenv()
+		.getOrDefault(
+			property,
+			getSigningProperties().getProperty(property),
+		)
+}
+
+fun Project.languageList(): List<String> {
+	return listOf(
+		"ar",      // Arabic
+		"bn-rBD",  // Bengali (Bangladesh)
+		"de",      // German
+		"en",      // English (Default)
+		"es",      // Spanish
+		"fa",      // Persian
+		"fr",      // French
+		"hi",      // Hindi
+		"in",      // Indonesian (legacy Java code → values-in)
+		"it",      // Italian
+		"pt-rBR",  // Portuguese (Brazil)
+		"ru",      // Russian
+		"tr",      // Turkish
+		"uk",      // Ukrainian
+		"vi-rVN",  // Vietnamese
+		"zh-rCN",  // Chinese (Simplified)
+		"zh-rTW",  // Chinese (Traditional)
+		"zh-rHK"   // Chinese (Traditional, Hong Kong)
+	).sorted()
+}
