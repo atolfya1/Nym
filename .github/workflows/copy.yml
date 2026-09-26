@@ -13,9 +13,11 @@ jobs:
 
       - name: Clone source sparse
         run: |
-          git clone --depth 1 --branch develop --filter=blob:none --sparse https://github.com/nymtech/nym-vpn-client.git source
-          cd source
+          git clone --depth 1 --branch develop --filter=blob:none --sparse https://github.com/nymtech/nym-vpn-client.git /tmp/source
+          cd /tmp/source
           git sparse-checkout set nym-vpn-android
+          echo "--- محتوای پوشه منبع ---"
+          ls -la /tmp/source/nym-vpn-android
 
       - name: Clean destination except .git and .github
         run: |
@@ -23,8 +25,7 @@ jobs:
 
       - name: Copy contents to root
         run: |
-          cp -r source/nym-vpn-android/. .
-          rm -rf .github/workflows/copy.yml.bak || true
+          cp -r /tmp/source/nym-vpn-android/. .
 
       - name: Commit and push
         run: |
